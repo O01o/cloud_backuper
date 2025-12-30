@@ -1,4 +1,5 @@
 import os
+import subprocess
 import boto3
 
 from src.main.logic import tree
@@ -12,36 +13,25 @@ def init_bucket(bucket_name: str):
 
 def push(local_path: str, upload_path: str, encryption: bool):
     assert _bucket_name is not None, "bucket_name must be initialized"
-    # upload to s3 recursively
-    for root, _, files in os.walk(local_path):
-        for file_child_path in files:
-            # define upload path
-            local_edge_path = os.path.join(root, file_child_path)
-            upload_edge_path = os.path.join(upload_path, os.path.relpath(local_edge_path, local_path))
-            # TODO: encryption option
-            # upload to s3
-            try:
-                _s3_client.upload_file(
-                    Filename=local_edge_path,
-                    Bucket=_bucket_name,
-                    Key=upload_edge_path,
-                    ExtraArgs={
-                        'StorageClass': 'STANDARD_IA'
-                    }
-                )
-            except Exception as e:
-                print(f"Error S3 uploading {local_path} to {upload_path}:", e)
+    s3_path = f"s3://{_bucket_name}/{upload_path}/"
+    s3_sync_command = [
+        "aws", "s3", "sync", 
+        local_path, s3_path, 
+        "--storage-class", "STANDARD_IA",
+        "--delete"
+    ]
+    subprocess.run(s3_sync_command, check=True)
 
 def push_tree(local_path: str, upload_path: str):
     assert _bucket_name is not None, "bucket_name must be initialized"
+    tree_content = tree.get_tree(local_path)
+    print("tree:", tree_content)
     try:
-        _s3_client.upload_file(
-            Filename=tree.get_tree(local_path),
+        _s3_client.put_object(
+            Body=tree_content,
             Bucket=_bucket_name,
-            Key=upload_path,
-            ExtraArgs={
-                'StorageClass': 'STANDARD_IA'
-            }
+            Key=os.path.join(upload_path, "tree.txt"),
+            StorageClass='STANDARD_IA',
         )
     except Exception as e:
         print(f"Error S3 uploading {local_path} to {upload_path}:", e)
