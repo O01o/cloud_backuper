@@ -17,6 +17,7 @@ backup_service.init_backup(backup=backup_s3_repository)
 backup_service.push(
     local_path=local_path,
     upload_path=upload_path,
+    archive_mode=False,
     encryption=False,
 )
 backup_service.push_tree(
