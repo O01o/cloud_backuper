@@ -6,24 +6,24 @@ def init_archiver(archiver: Archiver):
     global _archiver
     _archiver = archiver
 
-def archive(origin_path: str, backup_path: str, encryption: bool):
+def archive(local_path: str, upload_path: str, encryption: bool):
     assert _archiver is not None, "Archiver must be initialized"
     _archiver.archive(
-        origin_path=origin_path,
-        backup_path=backup_path,
+        local_path=local_path,
+        upload_path=upload_path,
         encryption=encryption,
     )
 
-def push_tree(origin_path: str, backup_path: str):
+def push_tree(local_path: str, upload_path: str):
     assert _archiver is not None, "Archiver must be initialized"
     _archiver.push_tree(
-        origin_path=origin_path,
-        backup_path=backup_path,
+        local_path=local_path,
+        upload_path=upload_path,
     )
 
-def restore(origin_path: str, backup_path: str):
+def restore(local_path: str, upload_path: str):
     assert _archiver is not None, "Archiver must be initialized"
     _archiver.restore(
-        origin_path=origin_path,
-        backup_path=backup_path,
+        local_path=local_path,
+        upload_path=upload_path,
     )
